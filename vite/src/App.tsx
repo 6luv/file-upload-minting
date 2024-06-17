@@ -19,13 +19,8 @@ const App: FC = () => {
     }
   };
 
-  const onChangeFile = async (e: ChangeEvent<HTMLInputElement>) => {
+  const uploadImage = async (formData: FormData) => {
     try {
-      if (!e.currentTarget.files) return;
-
-      const formData = new FormData();
-      formData.append("file", e.currentTarget.files[0]);
-
       const response = await axios.post(
         "https://api.pinata.cloud/pinning/pinFileToIPFS",
         formData,
@@ -38,7 +33,21 @@ const App: FC = () => {
         }
       );
 
-      console.log(response);
+      return `https://crimson-near-prawn-865.mypinata.cloud/ipfs/${response.data.IpfsHash}`;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onChangeFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!e.currentTarget.files) return;
+
+      const formData = new FormData();
+      formData.append("file", e.currentTarget.files[0]);
+
+      const imageUrl = await uploadImage(formData);
+      console.log(imageUrl);
     } catch (error) {
       console.error(error);
     }
