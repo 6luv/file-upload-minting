@@ -72,14 +72,18 @@ const App: FC = () => {
 
   const onChangeFile = async (e: ChangeEvent<HTMLInputElement>) => {
     try {
-      if (!e.currentTarget.files) return;
+      if (!e.currentTarget.files || !mintContract) return;
 
       const formData = new FormData();
       formData.append("file", e.currentTarget.files[0]);
 
       const imageUrl = await uploadImage(formData);
       const metadataUrl = await uploadMetadata(imageUrl!);
-      console.log(metadataUrl);
+
+      const transaction = await mintContract.mintNft(metadataUrl);
+      await transaction.wawit();
+
+      console.log(transaction);
     } catch (error) {
       console.error(error);
     }
