@@ -1,7 +1,8 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
-import { FC, useEffect, useState } from "react";
+import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Contract, JsonRpcSigner, ethers } from "ethers";
 import mintContractAbi from "./mintContractAbi.json";
+import axios from "axios";
 
 const App: FC = () => {
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
@@ -13,6 +14,31 @@ const App: FC = () => {
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       setSigner(await provider.getSigner());
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onChangeFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!e.currentTarget.files) return;
+
+      const formData = new FormData();
+      formData.append("file", e.currentTarget.files[0]);
+
+      const response = await axios.post(
+        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        formData,
+        {
+          headers: {
+            "Content-Type": "pultipart/form-data",
+            pinata_api_key: import.meta.env.VITE_PINATA_API_KEY,
+            pinata_secret_api_key: import.meta.env.VITE_PINATA_SECRET_API_KEY,
+          },
+        }
+      );
+
+      console.log(response);
     } catch (error) {
       console.error(error);
     }
@@ -40,7 +66,10 @@ const App: FC = () => {
       flexDir="column"
     >
       {signer ? (
-        <Text>{signer.address}</Text>
+        <>
+          <Text>{signer.address}</Text>
+          <input type="file" onChange={onChangeFile} />
+        </>
       ) : (
         <Button onClick={onClickMetamaask}>로그인</Button>
       )}
