@@ -26,7 +26,38 @@ const App: FC = () => {
         formData,
         {
           headers: {
-            "Content-Type": "pultipart/form-data",
+            "Content-Type": "multipart/form-data",
+            pinata_api_key: import.meta.env.VITE_PINATA_API_KEY,
+            pinata_secret_api_key: import.meta.env.VITE_PINATA_SECRET_API_KEY,
+          },
+        }
+      );
+
+      return `https://crimson-near-prawn-865.mypinata.cloud/ipfs/${response.data.IpfsHash}`;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const uploadMetadata = async (image: string) => {
+    try {
+      const metadata = JSON.stringify({
+        pinataContent: {
+          name: "Test",
+          description: "Test",
+          image,
+        },
+        pinataMetadata: {
+          name: "test.json",
+        },
+      });
+
+      const response = await axios.post(
+        "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+        metadata,
+        {
+          headers: {
+            "Content-Type": "application/json",
             pinata_api_key: import.meta.env.VITE_PINATA_API_KEY,
             pinata_secret_api_key: import.meta.env.VITE_PINATA_SECRET_API_KEY,
           },
@@ -47,7 +78,8 @@ const App: FC = () => {
       formData.append("file", e.currentTarget.files[0]);
 
       const imageUrl = await uploadImage(formData);
-      console.log(imageUrl);
+      const metadataUrl = await uploadMetadata(imageUrl!);
+      console.log(metadataUrl);
     } catch (error) {
       console.error(error);
     }
